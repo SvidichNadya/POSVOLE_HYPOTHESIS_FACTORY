@@ -1,5 +1,11 @@
 # Фабрика гипотез
 
+### Демонстрация работы
+
+- Видео: **[\[ссылка\]](https://drive.google.com/file/d/1nmw-1ZrNk19FTbLVIc0BbOtYYZfccrkw/view?usp=drive_link)**
+- Презентация: **[\[ссылка\]](https://drive.google.com/file/d/11tOatLZ62jlDwCuM5k9w4r6FiGR3OtAu/view?usp=drive_link)**
+
+
 ## Содержание
 
 1. [Краткое описание системы](#краткое-описание-системы)
@@ -307,8 +313,3 @@ Knowledge Base + Internet Search
 | Интерпретируемость | Источники и прозрачная логика |
 | Надежность | Валидация + fallback |
 | Производительность | Кэширование |
-
-### Демонстрация работы
-
-- Видео: **[\[ссылка\]](https://drive.google.com/file/d/1nmw-1ZrNk19FTbLVIc0BbOtYYZfccrkw/view?usp=drive_link)**
-
