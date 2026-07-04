@@ -47,8 +47,8 @@
 ### 1. Клонирование репозитория
 
 ```bash
-git clone https://github.com/your-username/research-navigator.git
-cd research-navigator
+git clone https://github.com/your-username/POSVOLE_HYPOTHESIS_FACTORY)
+cd POSVOLE_HYPOTHESIS_FACTORY
 ```
 
 ### 2. Выполнение скрипта запуска
