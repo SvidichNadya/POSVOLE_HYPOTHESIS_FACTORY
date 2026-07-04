@@ -1,0 +1,612 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фабрика гипотез</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { DEFAULT: '#135BEC', light: '#E7EEFF', dark: '#0B3EA3', slate: '#F8FAFC' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <script src="{% static 'js/token.js' %}"></script>
+    <script type="module" src="{% static 'js/app.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        .border-thin { border: 1px solid #E2E8F0; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+        canvas { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+        input[type="range"] { -webkit-appearance: none; appearance: none; background: #E2E8F0; height: 4px; border-radius: 2px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #135BEC; cursor: pointer; }
+    </style>
+</head>
+<body class="overflow-hidden h-screen flex text-[#0F172A]">
+
+<!-- Боковое меню -->
+<aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between h-full z-10 shrink-0">
+    <div>
+        <div class="p-6 border-b border-slate-100 flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white font-bold text-lg">
+                <i class="fa-solid fa-compass-drafting text-sm"></i>
+            </div>
+            <div>
+                <h1 class="text-xs font-bold uppercase tracking-wider text-slate-400">Движок исследований</h1>
+                <span class="text-sm font-semibold text-brand">Фабрика гипотез</span>
+            </div>
+        </div>
+        <nav class="p-4 space-y-1">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-[#135BEC] bg-brand-light font-semibold">
+                <i class="fa-solid fa-chart-line w-5 text-center"></i><span>Панель управления</span>
+            </button>
+            <button onclick="switchTab('objects')" id="nav-objects" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                <i class="fa-solid fa-cubes w-5 text-center"></i><span>Объекты и Устройства</span>
+            </button>
+            <button onclick="switchTab('projects')" id="nav-projects" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                <i class="fa-solid fa-folder-open w-5 text-center"></i><span>Проекты</span>
+            </button>
+            <button onclick="switchTab('hypotheses')" id="nav-hypotheses" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                <i class="fa-solid fa-lightbulb w-5 text-center"></i><span>Реестр гипотез</span>
+            </button>
+            <button onclick="switchTab('graph')" id="nav-graph" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                <i class="fa-solid fa-diagram-project w-5 text-center"></i><span>Граф связей</span>
+            </button>
+            <button onclick="switchTab('knowledge')" id="nav-knowledge" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                <i class="fa-solid fa-book-open w-5 text-center"></i><span>База знаний</span>
+            </button>
+        </nav>
+    </div>
+
+</aside>
+
+<!-- Основное содержимое -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-brand-slate">
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-4">
+            <h2 id="page-title" class="text-lg font-bold text-slate-900">Панель управления R&D</h2>
+            <div class="h-4 w-px bg-slate-200"></div>
+            <div class="flex items-center space-x-2 text-xs text-slate-400">
+                <i class="fa-solid fa-database"></i>
+                <span>Индексировано: <span id="kb-stats-papers">0</span> статей, <span id="kb-stats-patents">0</span> патентов</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="quickStartAnalysis()" class="bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all shadow-sm">
+                <i class="fa-solid fa-plus text-xs"></i><span>Новое исследование</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar" id="content-container">
+
+        <!-- Вкладка Dashboard -->
+        <section id="tab-dashboard" class="tab-section space-y-6">
+            <div class="bg-white border-thin rounded-xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div class="space-y-3 max-w-3xl">
+                    <div class="inline-flex items-center space-x-2 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold border border-amber-200">
+                        <i class="fa-solid fa-crown text-amber-500"></i>
+                        <span>Топ-1 Стратегическая рекомендация</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900" id="best-hypo-title">Загрузка...</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed" id="best-hypo-desc"></p>
+                    <div class="flex flex-wrap gap-4 pt-1">
+                        <span class="text-xs text-slate-500 flex items-center space-x-1.5"><i class="fa-solid fa-cubes text-slate-400"></i><span>Объект:</span><strong class="text-slate-700" id="best-hypo-object">—</strong></span>
+                        <span class="text-xs text-slate-500 flex items-center space-x-1.5"><i class="fa-solid fa-bullseye text-slate-400"></i><span>Цель (KPI):</span><strong class="text-brand font-semibold" id="best-hypo-kpi">+22% к ресурсу</strong></span>
+                        <span class="text-xs text-slate-500 flex items-center space-x-1.5"><i class="fa-solid fa-magnifying-glass text-slate-400"></i><span>База обоснования:</span><strong class="text-slate-700" id="best-hypo-evidence">12 статей, 4 патента</strong></span>
+                    </div>
+                </div>
+                <div class="lg:w-80 shrink-0 border-l lg:border-l border-slate-100 lg:pl-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <span class="text-[10px] text-slate-400 font-semibold uppercase block">Research ROI</span>
+                            <span class="text-lg font-bold text-slate-900" id="best-hypo-roi">—</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <span class="text-[10px] text-slate-400 font-semibold uppercase block">Стоимость НИОКР</span>
+                            <span class="text-lg font-bold text-slate-900" id="best-hypo-cost">—</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs bg-brand-light px-3 py-2 rounded-lg text-brand font-semibold">
+                        <span>Экономический эффект:</span>
+                        <span id="best-hypo-benefit">—</span>
+                    </div>
+                    <button onclick="createHypothesisFromRecommendation()" id="create-from-rec-btn" class="w-full py-2 bg-brand hover:bg-brand-dark text-white rounded-lg text-xs font-semibold text-center transition-all block disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-lightbulb mr-1"></i>Создать гипотезу из рекомендации
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white border-thin rounded-xl p-4 shadow-sm flex flex-col h-[320px]">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3 shrink-0">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-blue-400"></span><span>Идея / Разведка</span></span>
+                        <span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold" id="count-status-idea">0</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar" id="list-status-idea"></div>
+                </div>
+                <div class="bg-white border-thin rounded-xl p-4 shadow-sm flex flex-col h-[320px]">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3 shrink-0">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Валидация</span></span>
+                        <span class="bg-amber-50 text-amber-600 px-2 py-0.5 rounded text-[10px] font-bold" id="count-status-validation">0</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar" id="list-status-validation"></div>
+                </div>
+                <div class="bg-white border-thin rounded-xl p-4 shadow-sm flex flex-col h-[320px]">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3 shrink-0">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-brand"></span><span>Эксперимент</span></span>
+                        <span class="bg-brand-light text-brand px-2 py-0.5 rounded text-[10px] font-bold" id="count-status-experiment">0</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar" id="list-status-experiment"></div>
+                </div>
+                <div class="bg-white border-thin rounded-xl p-4 shadow-sm flex flex-col h-[320px]">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3 shrink-0">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>Внедрено / MVP</span></span>
+                        <span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold" id="count-status-completed">0</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar" id="list-status-completed"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white border-thin rounded-xl p-6 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Объекты исследования под оптимизацию (KPI)</h3>
+                        <button onclick="switchTab('objects')" class="text-xs text-brand font-semibold hover:underline">Все объекты <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="dashboard-objects-grid"></div>
+                </div>
+                <div class="bg-white border-thin rounded-xl p-6 shadow-sm flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Статистика Базы Знаний</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-500 flex items-center space-x-2"><i class="fa-solid fa-file-invoice text-slate-400"></i><span>Научные статьи</span></span>
+                                <span class="font-bold text-slate-800 kb-stats-papers" id="kb-stats-papers">0</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-500 flex items-center space-x-2"><i class="fa-solid fa-certificate text-slate-400"></i><span>Патенты</span></span>
+                                <span class="font-bold text-slate-800 kb-stats-patents" id="kb-stats-patents">0</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-500 flex items-center space-x-2"><i class="fa-solid fa-flask text-slate-400"></i><span>Отчеты</span></span>
+                                <span class="font-bold text-slate-800 kb-stats-reports" id="kb-stats-reports">0</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-500 flex items-center space-x-2"><i class="fa-solid fa-database text-slate-400"></i><span>Датасеты</span></span>
+                                <span class="font-bold text-slate-800 kb-stats-datasets" id="kb-stats-datasets">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-6 border-t border-slate-100">
+                        <button onclick="switchTab('knowledge')" class="w-full py-2 border border-slate-200 hover:border-brand rounded-lg text-xs font-semibold text-slate-600 hover:text-brand text-center transition-all">
+                            Открыть семантическую библиотеку
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка Objects -->
+        <section id="tab-objects" class="tab-section hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <p class="text-sm text-slate-500">Выберите исследуемый объект.</p>
+                <button onclick="openModal('modal-add-object')" class="border border-slate-200 hover:border-brand hover:text-brand bg-white text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-plus"></i><span>Добавить объект</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-4" id="objects-list-col"></div>
+                <div class="lg:col-span-2 bg-white border-thin rounded-xl p-6 shadow-sm space-y-6" id="object-workspace">
+                    <div class="text-center py-24 text-slate-400 space-y-3">
+                        <i class="fa-solid fa-cubes text-4xl text-slate-300"></i>
+                        <p class="text-sm">Выберите объект для просмотра</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка Projects -->
+        <section id="tab-projects" class="tab-section hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <p class="text-sm text-slate-500">Управление исследовательскими проектами. Все бизнес-показатели и чек-лист генерируются автоматически.</p>
+                <button onclick="openModal('modal-add-project')" class="border border-slate-200 hover:border-brand hover:text-brand bg-white text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-plus"></i><span>Создать проект</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-4" id="projects-list-col"></div>
+                <div class="lg:col-span-2 bg-white border-thin rounded-xl p-6 shadow-sm space-y-6" id="project-workspace">
+                    <div class="text-center py-24 text-slate-400 space-y-3">
+                        <i class="fa-solid fa-folder-tree text-4xl text-slate-300"></i>
+                        <p class="text-sm">Выберите проект для просмотра деталей</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка Hypotheses -->
+        <section id="tab-hypotheses" class="tab-section hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-6 lg:col-span-1">
+                    <div class="bg-white border-thin rounded-xl p-5 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Генератор гипотез</h3>
+                            <button onclick="document.getElementById('hypothesis-wizard-form').reset()" class="text-xs text-slate-400 hover:text-slate-600">Очистить</button>
+                        </div>
+                        <form id="hypothesis-wizard-form" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1">Объект исследования</label>
+                                <select id="form-object" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                                    <!-- заполняется из JS -->
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">Целевой KPI</label>
+                                    <select id="form-kpi-target" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                                        <option value="resource">Ресурс службы</option>
+                                        <option value="strength">Прочность</option>
+                                        <option value="cost">Стоимость</option>
+                                        <option value="density">Плотность энергии</option>
+                                        <option value="custom">Свой KPI</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">Ожидаемое улучшение</label>
+                                    <input type="text" id="form-kpi-val" placeholder="+20%" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                                </div>
+                            </div>
+                            <!-- Поле для кастомного KPI -->
+                            <div id="custom-kpi-container" class="hidden">
+                                <label class="block text-xs font-medium text-slate-500 mb-1">Свой KPI</label>
+                                <input type="text" id="form-custom-kpi" placeholder="Введите название KPI" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">Бюджет ($)</label>
+                                    <input type="number" id="form-budget" value="150000" min="0" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">Срок (мес.)</label>
+                                    <input type="number" id="form-duration" value="6" min="0" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1">Описание подхода</label>
+                                <textarea id="form-approach" rows="3" placeholder="Например: Легирование редкоземельными металлами..." class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs custom-scrollbar"></textarea>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 space-y-2">
+                                <span class="block text-[10px] font-bold text-slate-500 uppercase">Capability Model</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div><span class="block text-[8px] text-slate-400 uppercase">Ученые</span><input type="number" id="form-sci-count" value="3" min="0" class="w-full p-1 bg-white border border-slate-200 rounded text-center text-xs"></div>
+                                    <div><span class="block text-[8px] text-slate-400 uppercase">Инженеры</span><input type="number" id="form-eng-count" value="4" min="0" class="w-full p-1 bg-white border border-slate-200 rounded text-center text-xs"></div>
+                                    <div><span class="block text-[8px] text-slate-400 uppercase">Оборудование</span>
+                                        <select id="form-equipment" class="w-full p-1 bg-white border border-slate-200 rounded text-center text-[10px]">
+                                            <option value="high">Высокое</option>
+                                            <option value="mid" selected>Базовое</option>
+                                            <option value="low">Огранич.</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 bg-brand hover:bg-brand-dark text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-2 transition-all">
+                                <i class="fa-solid fa-gears"></i><span>Рассчитать и сгенерировать</span>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="bg-white border-thin rounded-xl p-5 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Все гипотезы</h3>
+                        </div>
+                        <input type="text" id="hypo-search" placeholder="Поиск..." onkeyup="filterHypothesisList()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                        <div class="space-y-2 max-h-[380px] overflow-y-auto custom-scrollbar" id="hypotheses-list-container"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 bg-white border-thin rounded-xl p-6 shadow-sm space-y-6" id="hypo-workspace-pane">
+                    <div class="text-center py-24 text-slate-400 space-y-3">
+                        <i class="fa-solid fa-lightbulb text-4xl text-slate-300"></i>
+                        <p class="text-sm">Выберите гипотезу из реестра или сгенерируйте новую.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка Graph -->
+        <section id="tab-graph" class="tab-section hidden space-y-6 h-[calc(100vh-140px)] flex flex-col">
+            <div class="flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0 shrink-0">
+                <p class="text-xs text-slate-500">Причинно-следственный граф знаний.</p>
+                <div class="flex items-center space-x-3 text-xs">
+                    <div class="relative">
+                        <input type="text" id="graph-search" placeholder="Найти узел..." onkeyup="handleGraphSearch()" class="p-1.5 pl-7 bg-white border border-slate-200 rounded-lg text-xs w-48">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-[10px]"></i>
+                    </div>
+                    <button onclick="highlightWhiteSpots()" class="bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-medium flex items-center space-x-1.5 transition-all">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i><span>Белые пятна</span>
+                    </button>
+                    <button onclick="resetGraphPhysics()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-2.5 py-1.5 rounded-lg transition-all" title="Сбросить анимацию">
+                        <i class="fa-solid fa-arrow-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 min-h-[300px] border border-slate-200 rounded-xl overflow-hidden relative bg-white">
+                <canvas id="causal-graph-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+                <div id="graph-node-details" class="absolute top-4 right-4 w-72 bg-white/95 border border-slate-200 shadow-lg rounded-xl p-4 hidden space-y-3 z-10 transition-all">
+                    <div class="flex justify-between items-start border-b border-slate-100 pb-2">
+                        <div>
+                            <h4 id="graph-node-title" class="font-bold text-sm text-slate-900">Узел</h4>
+                            <span id="graph-node-type" class="text-[9px] bg-brand-light text-brand px-1.5 py-0.5 rounded uppercase font-bold">Тип</span>
+                        </div>
+                        <button onclick="closeGraphNodeDetails()" class="text-slate-400 hover:text-slate-600 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="text-xs text-slate-600 space-y-2">
+                        <p id="graph-node-desc">Описание</p>
+                        <div class="space-y-1">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block">Обоснования</span>
+                            <div id="graph-node-evidence"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка Knowledge -->
+        <section id="tab-knowledge" class="tab-section hidden space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 bg-white border-thin rounded-xl p-4 shadow-sm">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="filterKBCategory('all')" id="kb-cat-all" class="kb-cat-btn px-3 py-1.5 bg-brand text-white rounded-lg text-xs font-semibold transition-all">Все</button>
+                    <button onclick="filterKBCategory('paper')" id="kb-cat-paper" class="kb-cat-btn px-3 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 rounded-lg text-xs font-semibold transition-all hover:bg-slate-100">Статьи</button>
+                    <button onclick="filterKBCategory('patent')" id="kb-cat-patent" class="kb-cat-btn px-3 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 rounded-lg text-xs font-semibold transition-all hover:bg-slate-100">Патенты</button>
+                    <button onclick="filterKBCategory('report')" id="kb-cat-report" class="kb-cat-btn px-3 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 rounded-lg text-xs font-semibold transition-all hover:bg-slate-100">Отчеты</button>
+                    <button onclick="filterKBCategory('dataset')" id="kb-cat-dataset" class="kb-cat-btn px-3 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 rounded-lg text-xs font-semibold transition-all hover:bg-slate-100">Датасеты</button>
+                </div>
+                <div class="flex items-center space-x-3 w-full md:w-auto">
+                    <div class="relative w-full md:w-64">
+                        <input type="text" id="kb-search-input" placeholder="Поиск..." onkeyup="handleKBSearch()" class="w-full p-2 pl-8 bg-slate-50 border border-slate-200 rounded-lg text-xs" autocomplete="off">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-xs"></i>
+                    </div>
+                    <button onclick="openModal('modal-upload-kb')" class="bg-brand text-white hover:bg-brand-dark px-4 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all shadow-sm shrink-0">
+                        <i class="fa-solid fa-cloud-arrow-up"></i><span>Загрузить</span>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="kb-resources-grid"></div>
+        </section>
+
+    </div>
+</main>
+
+<!-- Модальные окна -->
+
+<!-- Расширенное модальное окно загрузки в базу знаний -->
+<div id="modal-upload-kb" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 border-thin space-y-4">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Загрузка источника</h3>
+            <button onclick="closeModal('modal-upload-kb')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Тип источника</label>
+                <select id="upload-source-type" onchange="window.toggleUploadSource(this.value)" class="w-full p-2.5 bg-slate-50 border rounded-lg text-xs">
+                    <option value="web">Свободный поиск в интернете (Web Agent)</option>
+                    <option value="file">Локальный файл</option>
+                    <option value="folder">Локальная папка (рекурсивно)</option>
+                    <option value="db">Подключение к базе данных</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Категория</label>
+                <select id="upload-type" class="w-full p-2.5 bg-slate-50 border rounded-lg text-xs">
+                    <option value="paper">Научная статья</option>
+                    <option value="patent">Патент</option>
+                    <option value="report">Отчет</option>
+                    <option value="dataset">Датасет</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Название</label>
+                <input type="text" id="upload-title" class="w-full p-2.5 bg-slate-50 border rounded-lg text-xs">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Метаданные</label>
+                <input type="text" id="upload-meta" placeholder="Авторы / номер" class="w-full p-2.5 bg-slate-50 border rounded-lg text-xs">
+            </div>
+            <div id="source-file-div" class="hidden">
+                <label class="block text-xs font-medium text-slate-500 mb-1">Файл</label>
+                <input type="file" id="upload-file" accept=".pdf,.docx,.txt,.json" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+            </div>
+            <div id="source-path-div">
+                <label class="block text-xs font-medium text-slate-500 mb-1" id="path-label">Введите тему для поиска в сети</label>
+                <input type="text" id="upload-path" placeholder="Например: новые методы синтеза графена" class="w-full p-2.5 bg-slate-50 border rounded-lg text-xs">
+                <!-- Фильтры -->
+                <div id="web-filters-div" class="space-y-2 mt-3">
+                    <label class="flex items-center space-x-2 text-xs text-slate-600">
+                        <input type="checkbox" id="kb-filter-fresh" class="rounded border-slate-300 text-brand">
+                        <span>Только свежие публикации</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-xs text-slate-600">
+                        <input type="checkbox" id="kb-filter-verified" class="rounded border-slate-300 text-brand">
+                        <span>Строго научные / рецензируемые</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-xs text-slate-600">
+                        <input type="checkbox" id="kb-filter-exact" class="rounded border-slate-300 text-brand">
+                        <span>Точное соответствие теме</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="flex space-x-3 pt-2">
+            <button onclick="window.handleKBPublish()" class="flex-1 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-lg text-xs font-semibold transition-all">
+                <i class="fa-solid fa-cloud-arrow-up mr-2"></i>Найти и извлечь граф знаний
+            </button>
+            <button onclick="closeModal('modal-upload-kb')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition-all">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления объекта -->
+<div id="modal-add-object" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 border-thin space-y-4">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider flex items-center space-x-2"><i class="fa-solid fa-cubes text-brand"></i><span>Новый объект</span></h3>
+            <button onclick="closeModal('modal-add-object')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Название</label>
+                <input type="text" id="obj-new-name" placeholder="Название объекта" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Описание</label>
+                <textarea id="obj-new-desc" rows="2" placeholder="Фокус исследования..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs custom-scrollbar"></textarea>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg space-y-2">
+                <span class="block text-[10px] font-bold text-slate-500 uppercase">KPI для оптимизации</span>
+                <div class="space-y-2">
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="text" id="obj-kpi-1-name" value="Плотность энергии" class="p-1 border border-slate-200 rounded text-xs bg-white">
+                        <input type="text" id="obj-kpi-1-cur" value="180 Wh/kg" class="p-1 border border-slate-200 rounded text-xs bg-white text-center">
+                        <input type="text" id="obj-kpi-1-tar" value="250 Wh/kg" class="p-1 border border-slate-200 rounded text-xs bg-white text-center">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="text" id="obj-kpi-2-name" value="Ресурс службы" class="p-1 border border-slate-200 rounded text-xs bg-white">
+                        <input type="text" id="obj-kpi-2-cur" value="5 лет" class="p-1 border border-slate-200 rounded text-xs bg-white text-center">
+                        <input type="text" id="obj-kpi-2-tar" value="8 лет" class="p-1 border border-slate-200 rounded text-xs bg-white text-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex space-x-3 pt-2">
+            <button onclick="window.handlePublishObject()" class="flex-1 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-lg text-xs font-semibold text-center transition-all">Добавить</button>
+            <button onclick="closeModal('modal-add-object')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold text-center transition-all">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно создания проекта -->
+<div id="modal-add-project" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 border-thin space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Новый проект</h3>
+            <button onclick="closeModal('modal-add-project')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="project-form" class="space-y-4" onsubmit="submitNewProject(event)">
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Название проекта *</label>
+                <input type="text" id="proj-name" class="w-full p-2 bg-slate-50 border rounded-lg text-xs" required>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Краткая суть</label>
+                <textarea id="proj-desc" rows="2" class="w-full p-2 bg-slate-50 border rounded-lg text-xs"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Объект (опционально)</label>
+                    <select id="proj-object" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <option value="">-- Не выбрано --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Гипотеза (опционально)</label>
+                    <select id="proj-hypo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <option value="">-- Не выбрано --</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Имеющиеся ресурсы (бюджет, команда, оборудование)</label>
+                <textarea id="proj-res-avail" rows="2" placeholder="Например: 1 млн руб, 2 химика, микроскоп..." class="w-full p-2 bg-slate-50 border rounded-lg text-xs"></textarea>
+            </div>
+            <div class="text-[10px] text-slate-400 italic bg-slate-50 p-2 rounded border border-slate-200">
+                <i class="fa-solid fa-microchip mr-1"></i> Риски, сценарии, окупаемость и чек-лист будут рассчитаны автоматически.
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-brand hover:bg-brand-dark text-white rounded-lg text-xs font-semibold transition-all flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-brain"></i><span>Анализировать и создать проект</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно для отображения списка источников -->
+<div id="modal-sources" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 border-thin space-y-4 max-h-[80vh] flex flex-col">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider" id="sources-modal-title">Источники</h3>
+            <button onclick="closeModal('modal-sources')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto custom-scrollbar space-y-2" id="sources-list-container">
+            <!-- Список будет заполнен динамически -->
+        </div>
+        <div class="pt-2 border-t border-slate-100 flex justify-end">
+            <button onclick="closeModal('modal-sources')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition-all">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast контейнер -->
+<div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none"></div>
+
+<script>
+    // ===== ФУНКЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ПОЛЕЙ В МОДАЛКЕ ЗАГРУЗКИ =====
+    window.toggleUploadSource = function(val) {
+        const fileDiv = document.getElementById('source-file-div');
+        const pathDiv = document.getElementById('source-path-div');
+        const pathLabel = document.getElementById('path-label');
+        const pathInput = document.getElementById('upload-path');
+
+        if (val === 'file') {
+            fileDiv.classList.remove('hidden');
+            pathDiv.classList.add('hidden');
+        } else {
+            fileDiv.classList.add('hidden');
+            pathDiv.classList.remove('hidden');
+            if (val === 'folder') {
+                pathLabel.textContent = 'Путь к папке';
+                pathInput.placeholder = '/home/user/docs';
+            } else if (val === 'db') {
+                pathLabel.textContent = 'Строка подключения к БД';
+                pathInput.placeholder = 'postgresql://user:pass@localhost/db';
+            } else if (val === 'web') {
+                pathLabel.textContent = 'Введите тему для поиска в сети';
+                pathInput.placeholder = 'Например: новые методы синтеза графена';
+            }
+        }
+    };
+
+    // Инициализация отображения для web-поиска по умолчанию
+    document.addEventListener('DOMContentLoaded', function() {
+        window.toggleUploadSource('web');
+
+        // Показ/скрытие поля кастомного KPI в форме гипотезы
+        const kpiSelect = document.getElementById('form-kpi-target');
+        const customContainer = document.getElementById('custom-kpi-container');
+        if (kpiSelect && customContainer) {
+            kpiSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customContainer.classList.remove('hidden');
+                } else {
+                    customContainer.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
